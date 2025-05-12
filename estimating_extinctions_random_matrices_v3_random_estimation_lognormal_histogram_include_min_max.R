@@ -58,9 +58,6 @@ row <- data.frame(idx = NaN, stressor = NaN, nV = NaN, nP = NaN,
                   )
 
 
-# write.table(row, file = 'extinction_ln_histograms.csv', sep = ",", 
-#             row.names = FALSE, append = TRUE,
-#             col.names=!file.exists("extinction_ln_histograms.csv"))
 rm(row)
 
 for (mode_predators in c('generalists', 'specialists')){
@@ -75,8 +72,8 @@ for (mode_predators in c('generalists', 'specialists')){
       n_eq <- matrix(rep(-1, nV+nP), nV+nP, 1)
       while (sum(n_eq < 0)){
         # Matrix A interactions
-        #A_VV <- abs(matrix(rnorm(nV*nV, mean = alpha, sd = sigma*alpha), nV, nV))
-        A_VV <- exp(matrix(rnorm(nV*nV, mean = log(alpha/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))), nV, nV))
+        #A_VV <- abs(matrix(rnorm(nV*nV, mean = alpha, sd = sigma*alpha), nV, nV))  # If we want our alphas to be normally distributed
+        A_VV <- exp(matrix(rnorm(nV*nV, mean = log(alpha/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))), nV, nV)) # If we want our alphas to be log-normally distributed
         diag(A_VV) <- rep(1, nV)
         
         alphas_vector <- A_VV[row(A_VV) != col(A_VV)]
@@ -90,8 +87,8 @@ for (mode_predators in c('generalists', 'specialists')){
         
         A_PP <- diag(nP)
         if (mode_predators == 'generalists'){
-          #A_VP <- (1./nV)*abs(matrix(rnorm(nV*nP, mean = lambda, sd = sigma*lambda), nV, nP))
-          A_VP <- (1./nV)*exp(matrix(rnorm(nV*nP, mean = log(lambda/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))), nV, nP))
+          #A_VP <- (1./nV)*abs(matrix(rnorm(nV*nP, mean = lambda, sd = sigma*lambda), nV, nP))    # If we want our alphas to be normally distributed
+          A_VP <- (1./nV)*exp(matrix(rnorm(nV*nP, mean = log(lambda/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))), nV, nP)) # If we want our alphas to be log-normally distributed
           
           lambdas_vector <- c(nV*A_VP);
           
@@ -103,8 +100,8 @@ for (mode_predators in c('generalists', 'specialists')){
           rm(lambdas_vector)
           
         } else if (mode_predators == 'specialists') {
-          #A_VP <- diag(x=1, nrow = nV, ncol = nP) * abs(matrix(rnorm(nV*nP, mean = lambda, sd = sigma*lambda), nV, nP))
-          A_VP <- diag(x=1, nrow = nV, ncol = nP) * exp(matrix(rnorm(nV*nP, mean = log(lambda/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))), nV, nP))
+          #A_VP <- diag(x=1, nrow = nV, ncol = nP) * abs(matrix(rnorm(nV*nP, mean = lambda, sd = sigma*lambda), nV, nP)) # If we want our alphas to be normally distributed
+          A_VP <- diag(x=1, nrow = nV, ncol = nP) * exp(matrix(rnorm(nV*nP, mean = log(lambda/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))), nV, nP)) # If we want our alphas to be log-normally distributed
           
           lambdas_vector <- c(diag(A_VP));
           
@@ -115,8 +112,8 @@ for (mode_predators in c('generalists', 'specialists')){
           
           rm(lambdas_vector)
         }
-        #A_PV <- -1. * t(A_VP) * abs(matrix(rnorm(nV*nP, mean = eta, sd = sigma*eta), nP, nV))
-        eta_PV <- exp(matrix(rnorm(nV*nP, mean = log(eta/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))), nP, nV))
+        #A_PV <- -1. * t(A_VP) * abs(matrix(rnorm(nV*nP, mean = eta, sd = sigma*eta), nP, nV))  # If we want our alphas to be normally distributed
+        eta_PV <- exp(matrix(rnorm(nV*nP, mean = log(eta/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))), nP, nV)) # If we want our alphas to be log-normally distributed
         A_PV <- -1. * t(A_VP) * eta_PV
         A_total <- rbind(cbind(A_VV, A_VP), cbind(A_PV, A_PP)) 
         if (mode_predators == 'generalists'){
@@ -135,12 +132,12 @@ for (mode_predators in c('generalists', 'specialists')){
         rm(A_VV, A_VP, A_PV, A_PP)
         
         # Growth and mortality rates
-        #bS <- abs(rnorm(nV, mean = b, sd = b*sigma))
-        #mS <- abs(rnorm(nV, mean = m, sd = m*sigma))
-        #dS <- abs(rnorm(nP, mean = d, sd = d*sigma))
-        bS <- exp(rnorm(nV, mean = log(b/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))))
-        mS <- exp(rnorm(nV, mean = log(m/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))))
-        dS <- exp(rnorm(nP, mean = log(d/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2))))
+        #bS <- abs(rnorm(nV, mean = b, sd = b*sigma))   # If we want our parameters to be normally distributed
+        #mS <- abs(rnorm(nV, mean = m, sd = m*sigma))   # If we want our parameters to be normally distributed
+        #dS <- abs(rnorm(nP, mean = d, sd = d*sigma))   # If we want our parameters to be normally distributed
+        bS <- exp(rnorm(nV, mean = log(b/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2)))) # If we want our parameters to be log-normally distributed
+        mS <- exp(rnorm(nV, mean = log(m/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2)))) # If we want our parameters to be log-normally distributed
+        dS <- exp(rnorm(nP, mean = log(d/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2)))) # If we want our parameters to be log-normally distributed
         
         mean_b = mean(c(bS)); var_b = var(c(bS)); 
         mean_bM1 = mean(1/c(bS)); var_bM1 = var(1/c(bS)); 
@@ -159,10 +156,10 @@ for (mode_predators in c('generalists', 'specialists')){
         
         
         # Sensitivities
-        #tauVS <- abs(rnorm(nV, mean = tauV, sd = tauV*sigma)) #rep(tauV, nV)
-        #tauPS <- abs(rnorm(nP, mean = tauP, sd = tauP*sigma)) #rep(tauP, nP)
-        tauVS <- exp(rnorm(nV, mean = log(tauV/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2)))) #rep(tauV, nV)
-        tauPS <- exp(rnorm(nP, mean = log(tauP/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2)))) #rep(tauP, nP)
+        #tauVS <- abs(rnorm(nV, mean = tauV, sd = tauV*sigma)) #rep(tauV, nV)   # If we want our taus to be normally distributed
+        #tauPS <- abs(rnorm(nP, mean = tauP, sd = tauP*sigma)) #rep(tauP, nP)    # If we want our taus to be normally distributed
+        tauVS <- exp(rnorm(nV, mean = log(tauV/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2)))) #If we want our taus to be log-normally distributed
+        tauPS <- exp(rnorm(nP, mean = log(tauP/sqrt(1+sigma**2)), sd = sqrt(log(1+sigma**2)))) #If we want our taus to be log-normally distributed
         
         mean_tauV = mean(c(tauVS)); var_tauV = var(c(tauVS)); 
         mean_tauVM1 = mean(1/c(tauVS)); var_tauVM1 = var(1/c(tauVS)); 
