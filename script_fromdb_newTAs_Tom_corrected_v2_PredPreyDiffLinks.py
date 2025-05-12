@@ -16,16 +16,11 @@ import sys
 import time           
 import tracemalloc
 
-# =============================================================================
-# os.environ['R_HOME'] = 'C:/Program Files/R/R-4.0.1' 
-# import rpy2.robjects as ro
-# from rpy2.robjects.packages import importr
-# from rpy2.robjects import numpy2ri
-# #importr('rglobi')
-# importr('OCNet')
-# =============================================================================
-
 def signif(x, p):
+    """
+        signif(x, p).
+        This function round a real number 'x' to the specific number of significative figures 'p' 
+    """
     x = np.asarray(x)
     x_positive = np.where(np.isfinite(x) & (x != 0), np.abs(x), 10**(p-1))
     mags = 10 ** (p - 1 - np.floor(np.log10(x_positive)))
@@ -45,8 +40,6 @@ def Aver_Alphas_given_traits_v2(traits_comp, aver_alphas, pars):
     data_size= traits_comp[ [i for i in traits_comp.columns[traits_comp.columns.str.startswith('Size')]] ]
     aver_size = sum([(i+1) * data_size.iloc[:,i] for i in range(data_size.shape[1])]) / sum([ data_size.iloc[:,i] for i in range(data_size.shape[1])])    
     var_size  = sum([(i+1)**2 * data_size.iloc[:,i] for i in range(data_size.shape[1])]) / sum([ data_size.iloc[:,i] for i in range(data_size.shape[1])]) - aver_size**2
-    #    traits_comp = traits_comp.drop(columns=[i for i in traits_comp.columns[traits_comp.columns.str.startswith('Size')]])
-    #    traits_comp = traits_comp.assign( Aver_Size =  aver_size  )
     effects_size = Effect_Traits_Continuous(aver_trait = aver_size, var_trait = var_size, omega = pars['omega_size']) 
     aver_alphas = aver_alphas * effects_size
     
@@ -57,15 +50,6 @@ def Aver_Alphas_given_traits_v2(traits_comp, aver_alphas, pars):
     # I normalize the value of the traits, so its sum is 1. I do not do that if that species has all the trait values equal to zero. zero arrays cannot be normalized.
     overlap_food = Effect_Traits_Categorical(traits = np.array(traits_food)) # cosine of the angles formed betwenn the food-resources vectors of the different species
     aver_alphas[overlap_food < pars['thershold_overlap_foods']] = 0.
-    
-# =============================================================================
-#     ## Effect of feeding behaviour on aver_alphas
-#     # reduct_alphas_feed = 1/10 #average reduction in the alphas if the species don't share any feeding behaviour. 1/10 = 10\%
-#     traits_feed = traits_comp[ [i for i in traits_comp.columns[traits_comp.columns.str.startswith('feed')]] ] 
-#     # I normalize the value of the traits, so its sum is 1. I do not do that if that species has all the trait values equal to zero. zero arrays cannot be normalized.
-#     sumtraitsfeed = traits_feed.sum(axis = 1, skipna = True)
-#     sumtraitsfeed[ sumtraitsfeed<=0 ] = 1
-# =============================================================================
                  
     return aver_alphas
 
@@ -209,26 +193,15 @@ def Compute_Pop_Sizes_v2(pars, pars_nw, pars_dyn):
                      (pars['number_species'], pars['number_nodes']) )
     for k in range(pars['number_nodes']):
         for i in range(pars['number_species']):
-            #if (pars_nw['width'][k] /pars_dyn['Alphas_pristine'][i,i])>0:
-                #pop[i,k] = np.random.normal(pars_nw['width'][k]/pars_dyn['Alphas_pristine'][i,i], 0.1*pars_nw['width'][k]/pars_dyn['Alphas_pristine'][i,i], 1) 
             pop[i,k] = 1./(np.max(np.abs(pars_dyn['Alphas'][i,i])) + 1e-3)
-            # if (1./pars_dyn['Alphas'][i,i])>0:
-            #     pop[i,k] = np.random.normal(1./pars_dyn['Alphas'][i,i], 0.1*1./pars_dyn['Alphas'][i,i], 1) 
-            # else:
-            #     pop[i,k] = 0.
 
     times = np.linspace(0, pars['time_sim'], int(pars['time_sim'])+1)
-    
-    
-    #    args = [Rs, Alphas, Aquatic, Movs, edges_norm_dist, Fly, Movs_Fly, Inv_distances, Sigmas]
-    
+        
     ## Environmental variance of the environmental stochasticity 
     sigmas = pars['sigma_env'] * np.ones((pars['number_species'], pars['number_nodes']))
         
     args = {
             'rs': pars_dyn['rs'],
-            # 'Alphas_pristine': pars_dyn['Alphas_pristine'], 
-            # 'Alphas_polluted': pars_dyn['Alphas_polluted'], 
             'Alphas': pars_dyn['Alphas'],
             'Alphas_x': pars_dyn['Alphas_x'],
             'bool_polluted_node': pars_nw['bool_polluted_node'],
@@ -260,22 +233,13 @@ def Compute_Pop_Sizes_v2(pars, pars_nw, pars_dyn):
     reduct_det_growth = np.zeros((pars['number_species'], pars['number_nodes']))
     env_noise_variance_growth = np.zeros((pars['number_species'], pars['number_nodes']))
     for sp in range(pars['number_species']):
-        # reduct_det_growth[sp,:] = 0.5 * sigmoid(-args['MSS'][sp]) * args['chem_conc'][:]/100
-        # env_noise_variance_growth[sp,:] = sigmoid(-args['MSS'][sp]) * np.ones(len(args['chem_conc'][:]))
-        # reduct_det_growth[sp,:] = -1. * args['k_chem'][sp] * args['rs'][sp] * ( np.exp(args['chem_conc'][:]/args['EC'][sp])/(np.exp(args['chem_conc'][:]/args['EC'][sp]) - 1) )
         reduct_det_growth[sp,:] = -1. * args['k_chem'][sp] * args['rs'][sp] *  (1. - np.exp(-1. * args['chem_conc'][:]/args['EC'][sp])) + 1E-3 * np.abs(args['rs'][sp])
-        # env_noise_variance_growth[sp,:] = args['k_chem'][sp] *  np.ones(len(args['chem_conc'][:])) 
     
     cont_t_precision = 0    
     for t in np.linspace(0, pars['time_sim'], Incr_prec_t*int(pars['time_sim'])+1):
         pop = pop \
             +  dt * (np.reshape(dNdt_OCNet_v2_local(t=t, N=pop, args = args), (pars['number_species'], pars['number_nodes'])) 
-                     - reduct_det_growth*pop) #\
-            #+ np.sqrt(dt) * pop * env_noise_variance_growth * \
-            #    np.transpose(np.reshape(np.random.uniform(
-            #        low =-1*np.repeat(args['chem_conc'][:],pars['number_species']), 
-            #        high=   np.repeat(args['chem_conc'][:],pars['number_species'])),
-            #        (pars['number_nodes'],pars['number_species'])))
+                     - reduct_det_growth*pop) 
         pop[np.isfinite(pop)==False]=0.
         pop[pop < pars['limit_detec']] = 0.
         pop = pop + dt * np.reshape(dNdt_OCNet_v2_disp(t=t, N=pop, args = args), (pars['number_species'], pars['number_nodes']))
@@ -286,8 +250,6 @@ def Compute_Pop_Sizes_v2(pars, pars_nw, pars_dyn):
             pops[:,:,cont_t] = np.reshape(pop, (pars['number_species'], pars['number_nodes']))
             cont_t = cont_t + 1
         cont_t_precision = (cont_t_precision + 1) % Incr_prec_t
-    
-    
 
     if (pars['number_nodes']>1):
         return pops
@@ -302,7 +264,6 @@ def dNdt_OCNet_v2_local(t, N, args):
     N = np.reshape(N,  (np.shape(args['Alphas'])[0], np.shape(args['edges_norm_dist'])[0])) #Bool_Polluted_nodes
     
     dndt = (
-        # local dynamics disct["Rs"]
         np.einsum("ik,ik -> ik", args['rs'], N)  # Exponential growth rate
         - np.einsum("ijk,ik,jk -> ik",args['Alphas_x'],N,N) #density regulation 
         )
@@ -335,12 +296,6 @@ def dNdt_OCNet_v2_disp(t, N, args):
         )
     return np.reshape(dndt, np.shape(args['Alphas'])[0]* np.shape(args['edges_norm_dist'])[0])  
 
-# def Effect_Traits_Categorical(traits):
-#     effect = np.ones((np.shape(traits)[0],np.shape(traits)[0]))
-#     for i in range(np.shape(traits)[0]):
-#         for j in range(np.shape(traits)[0]):
-#             effect[i,j] = np.sum(np.sqrt(traits)[i] * np.sqrt(traits)[j])
-#     return effect  
 
 
 def Effect_Traits_Categorical(traits):
@@ -360,31 +315,6 @@ def Effect_Traits_Continuous(aver_trait, var_trait , omega):
                        1./(2*var_trait[i] + 2*var_trait[j] + omega**2))
     return effect
 
-# =============================================================================
-# def GenerateSpatialNetwork_1Loc(pars):
-#     pars_nw = {
-#         'G': np.nan, 
-#         'node': np.array([0]), 
-#         'ranknode': np.array([0]), 
-#         'connectivity': np.array([0]) , 
-#         'pos': np.zeros((2,1)), 
-#         'edges': np.zeros((1,1)),
-#         'width': np.array([1]),
-#         'depth': np.array([1]),
-#         'vel': np.array([1]),
-#         'dist_river': np.zeros((1,1)),
-#         'dist_air': np.zeros((1,1)),
-#         'bool_polluted_node': np.array([1]), 
-#         'chem_conc': np.array([pars['conc_polluted_nodes']]),
-#         'edges_norm_dist': np.reshape(np.array([0]), (1,1))
-#         }
-#     
-#     if (pars['frac_polluted_nodes'] == 0):
-#         pars_nw['bool_polluted_node'] = np.array([0])
-#         pars_nw['chem_conc'] = np.array([0])
-#         
-#     return pars_nw
-# =============================================================================
 
 
 def GenerateSpatialNetwork_OCNet_MaxReach_presets(pars, seed=np.int(datetime.datetime.now().strftime("%f"))):
@@ -477,170 +407,7 @@ def GenerateSpatialNetwork_OCNet_MaxReach_presets(pars, seed=np.int(datetime.dat
     
     return pars_nw
 
-# =============================================================================
-# def GenerateSpatialNetwork_OCNet_MaxReach(pars, seed=np.int(datetime.datetime.now().strftime("%f"))):
-#     if (pars['approx_number_nodes']>=2):
-#         numpy2ri.activate()
-#         ro.r.assign('seed', seed) 
-#         #ro.r.assign('thrA', pars['thrA'])
-#         ro.r.assign('sizeX', pars['size'])
-#         ro.r.assign('sizeY', pars['size'])
-#         ro.r.assign('approx_number_nodes', pars['approx_number_nodes'])
-#         ro.r('''
-#         flag = FALSE
-#         while (flag == FALSE){
-#             OCN <- create_OCN(sizeX,sizeY, outletSide = "S", outletPos = sample(1:sizeX,1))
-#             OCN <- landscape_OCN(OCN)
-#         
-#             thr <- find_area_threshold_OCN(OCN, maxReachLength = floor(sizeX/5))
-#             indThr <- which(abs(thr$nNodesAG - approx_number_nodes) == min(abs(thr$nNodesAG - approx_number_nodes)))
-#             indThr <- max(indThr) # pick the last ind_thr that satisfies the condition above
-#             thrA <- thr$thrValues[indThr] # corresponding threshold area
-#         
-#         
-#             OCN <- aggregate_OCN(landscape_OCN(OCN), thrA = thrA, maxReachLength = floor(sizeX/5))
-#         
-#             OCN <- rivergeometry_OCN(OCN)
-#             
-#             if (OCN$AG$nNodes == approx_number_nodes) {
-#                 flag = TRUE
-#             }  
-#         
-#         }
-#     
-#         nodes <- 1:OCN$AG$nNodes
-#         posoutlet = nodes[OCN$AG$downNode==0]
-#         edges <- as.matrix(OCN$AG$W)
-#         edges <- edges + t(edges)
-#         Xnode <- OCN$AG$X
-#         Ynode <- OCN$AG$Y
-#         connectedto <- OCN$AG$downNode
-#     
-#         area <- OCN$AG$A
-#         for (node1 in seq(from=OCN$AG$nNodes, to=1, by=-1)){
-#             for (node2 in seq(from=OCN$AG$nNodes, to=1, by=-1)){
-#                 if (edges[node1, node2]>0 & OCN$AG$A[node1]>=OCN$AG$A[node2]){
-#                     area[node1] = area[node1] - OCN$AG$A[node2]
-#                 }
-#             }
-#         }
-#         ''')
-#         
-#         ro.r('width <- OCN$AG$width')
-#         ro.r('depth <- OCN$AG$depth')
-#         ro.r('vel   <- OCN$AG$velocity')
-#         numpy2ri.deactivate()
-# 
-#         nodes     = np.array(list(ro.r.nodes)) - 1 #-1, because in r the first node is the node 1, while in python is the node 0
-#         posoutlet = np.array(list(ro.r.posoutlet)) - 1
-#         posoutlet = posoutlet[0]
-#         Xnode     = np.array(list(ro.r.Xnode))
-#         Ynode     = np.array(list(ro.r.Ynode))
-#         width     = np.array(list(ro.r.width))
-#         depth     = np.array(list(ro.r.depth))
-#         vel       = np.array(list(ro.r.vel))
-#         lengs     = np.array(ro.r('OCN$AG$leng'))
-#         edges     = np.reshape(np.array(list(ro.r.edges)), (len(nodes),len(nodes)))   
-#         
-#         G = nx.generators.empty_graph()
-#         G.add_nodes_from(nodes)
-#         ranknodes = np.zeros(len(nodes), dtype=int )
-#         dist_air = np.zeros((len(nodes),len(nodes)))
-#         for node1 in nodes:
-#             for node2 in range(node1, np.max(nodes)+1):
-#                 dist_air[node1,node2] = np.sqrt( (Xnode[node1]-Xnode[node2])**2 + (Ynode[node1]-Ynode[node2])**2  )
-#                 if (edges[node1,node2]>0):
-#                     G.add_edge(node1, node2)
-#         dist_air = symmetrize(dist_air)
-#         for node1 in nodes:
-#             ranknodes[node1] = nx.shortest_path_length(G,source=posoutlet)[node1]
-#         pos = np.zeros((2,len(nodes)))
-#         pos[0,:] = Xnode
-#         pos[1,:] = Ynode
-#         
-#         dist_river = np.zeros(np.shape(dist_air))
-#         for node1 in nodes:
-#             for node2 in range(node1+1, np.max(nodes)+1):
-#                 path_nodes = nx.shortest_path(G, source=node1, target=node2)
-#                 min_pos = np.array(path_nodes)[np.min(ranknodes[path_nodes])==ranknodes[path_nodes]]
-#                 path_nodes.remove(min_pos)
-#                 dist_river[node1,node2] = np.sum(lengs[path_nodes])
-#         dist_river =   symmetrize(dist_river)
-#         
-#     else:
-#         nodes     = np.array([0])
-#         posoutlet = np.array([0])
-#         Xnode     = np.array([0])
-#         Ynode     = np.array([0])
-#         width     = np.array([1])
-#         depth     = np.array([1])    
-#         vel       = np.array([0])
-#         lengs     = np.array([0])
-#         edges     = np.array([[0]])
-#         
-#         G = nx.generators.empty_graph()
-#         G.add_nodes_from(nodes)
-# 
-#     
-#         G.add_nodes_from(nodes)
-#         ranknodes = np.zeros(len(nodes), dtype=int )
-#         dist_air = np.zeros((len(nodes),len(nodes)))
-#         pos = np.zeros((2,len(nodes)))
-#         pos[0,:] = Xnode
-#         pos[1,:] = Ynode
-#         
-#         dist_river = np.zeros(np.shape(dist_air))
-# 
-#     
-#     
-#     dist_river = np.zeros(np.shape(dist_air))
-#     for node1 in nodes:
-#         for node2 in range(node1+1, np.max(nodes)+1):
-#             path_nodes = nx.shortest_path(G, source=node1, target=node2)
-#             min_pos = np.array(path_nodes)[np.min(ranknodes[path_nodes])==ranknodes[path_nodes]]
-#             path_nodes.remove(min_pos)
-#             dist_river[node1,node2] = np.sum(lengs[path_nodes])
-#     dist_river =   symmetrize(dist_river)
-#     
-#     
-#     if len(nodes)==1:
-#         connectivities = np.array([0])
-#     else:
-#         connectivities = np.array(G.degree())[:,1]
-#         
-#     bool_polluted_node = np.zeros(len(nodes))
-#     bool_polluted_node = np.zeros(len(nodes))
-#     temp = np.random.uniform(0,1,len(nodes))
-#     bool_polluted_node[temp< pars['frac_polluted_nodes']] = 1
-#     concs = bool_polluted_node * pars['conc_polluted_nodes']
-#     
-#     pars_nw = {
-#         'G': G, 
-#         'node': nodes, 
-#         'ranknode': ranknodes, 
-#         'connectivity': connectivities , 
-#         'pos': pos, 
-#         'edges': edges,
-#         'width': width,
-#         'depth': depth,
-#         'vel': vel,
-#         'dist_river': dist_river,
-#         'dist_air': dist_air,
-#         'bool_polluted_node': bool_polluted_node, 
-#         'chem_conc': concs
-#         }
-#     edges_norm_dist = np.zeros( np.shape( pars_nw['edges'] ))
-#     if len(nodes)==1:
-#         pars_nw['edges_norm_dist'] = edges_norm_dist
-#     else:
-#         for k1 in range(len(nodes)):
-#             for k2 in range(len(nodes)):
-#                 if (pars_nw['edges'][k1,k2]>0):
-#                     edges_norm_dist[k1,k2] = edges[k1,k2] / dist_river[k1,k2]
-#         pars_nw['edges_norm_dist'] = edges_norm_dist
-#     
-#     return pars_nw
-# =============================================================================
+
 
 def is_non_zero_file(fpath):
     """is_non_zero_file(fpath)
@@ -667,7 +434,7 @@ def Random_Alphas(aver_alpha, sigma):
         for j in range(number_species):
             #np.random.seed(seed)
             alphas[i,j] = np.random.normal(  aver_alpha[i,j], sigma*np.abs(aver_alpha[i,j]), 1  ) 
-            #alphas[i,j] = random.gauss(  aver_alpha[i,j], sigma*aver_alpha[i,j]  ) 
+    
     return alphas
 
 def RandString(k=8):
@@ -721,8 +488,8 @@ def SpeciesParameters_Troph_v3_method(pars, pars_nw, pars_chemres_size1, data_tr
         ))
         
         
-    # We distinguish between up and downs specialist, based on the long_dist trait.
-    # There ur: up`specialist, down specialist, generalist.
+    # We distinguish between up and down specialist, based on the long_dist trait.
+    # Thet are: up specialist, down specialist, generalist.
     BoolSpecialist_Up   = np.zeros(pars['number_species'], dtype=bool)
     BoolSpecialist_Down = np.zeros(pars['number_species'], dtype=bool)
     for i in range(pars['number_species']):
@@ -749,10 +516,6 @@ def SpeciesParameters_Troph_v3_method(pars, pars_nw, pars_chemres_size1, data_tr
                 BoolSpecialist_Down[i] = True
     
     
-    """(aquatic, aver_disp_rate_aq, flying, aver_disp_rate_fly) = Aver_Disp_Rates_given_traits(
-         traits_disp = traits_disp,
-         aver_disp_rate = pars['aver_disp_rate'], 
-         ratio_disp_rate_fliers = pars['ratio_disp_rate_fliers'])"""
     disp_mode = Categorize_disp(traits_disp = traits_disp)
     aquatic_pas, aquatic_act = disp_mode['aquatic_pas'],  disp_mode['aquatic_act']
     flying_pas,flying_act    = disp_mode['flying_pas'], disp_mode['flying_act']
@@ -821,7 +584,8 @@ def SpeciesParameters_Troph_v3_method(pars, pars_nw, pars_chemres_size1, data_tr
                         rs[i,k1] = rs[i,k1] * (1+pars['increase_growth_prefer_hab'])
                     else:
                         rs[i,k1] = rs[i,k1] + np.abs(rs[i,k1])*pars['increase_growth_prefer_hab']
-                else: #elif (pars_nw['dist_to_0'][k1] < 0.25 * np.max(pars_nw['dist_to_0'])): #If the species is not in the prefered habitat: Prey: rs' = -rs (Delta rs=-2rs), Predator: - abs(rs)'=-3*abs(rs) (Delta rs = - 3*abs(rs) - (-abs(rs)) = - 2 * abs(rs)). 
+                else: #elif (pars_nw['dist_to_0'][k1] < 0.25 * np.max(pars_nw['dist_to_0'])): 
+                    #If the species is not in the prefered habitat: 
                     if (BoolPredator[i]==False):
                         rs[i,k1] = rs[i,k1] * (1 - pars['decrease_growth_not_prefer_hab'])  #-1. * np.abs(rs[i,k1])
                     else:
@@ -834,7 +598,8 @@ def SpeciesParameters_Troph_v3_method(pars, pars_nw, pars_chemres_size1, data_tr
                         rs[i,k1] = rs[i,k1] * (1+pars['increase_growth_prefer_hab'])
                     else:
                         rs[i,k1] = rs[i,k1] + np.abs(rs[i,k1])*pars['increase_growth_prefer_hab']
-                else: #elif (pars_nw['dist_to_0'][k1] > 0.75 * np.max(pars_nw['dist_to_0'])): #If the species is not in the prefered habitat, they died at a rate equal to its growth (death for predator) rates. I.e., the prey species will disapear from the non-prefered habitats, while the predators would need a much higher prey density to maintain its population.
+                else: #elif (pars_nw['dist_to_0'][k1] > 0.75 * np.max(pars_nw['dist_to_0'])): 
+                    #If the species is not in the prefered habitat
                     if (BoolPredator[i]==False):
                         rs[i,k1] = rs[i,k1] * (1 - pars['decrease_growth_not_prefer_hab']) #-1. * np.abs(rs[i,k1])
                     else:
@@ -863,16 +628,14 @@ def SpeciesParameters_Troph_v3_method(pars, pars_nw, pars_chemres_size1, data_tr
                     movs_aq_act[i,k1,k2]  = disp_mode['aquatic_act'][i] * disp_rate_aq_act  * frac_mov_between_nodes_aq_act[k1,k2]
                 
                 if (pars_nw['dist_to_0'][k1] < pars_nw['dist_to_0'][k2]): # Moving Against the Current. NOW WE DO NOT DISTINGUISH BETWEEN AGAINST AND FOLLOWING THE CURRENT MOVEMENTS
-                    movs_aq_pas[i,k1,k2] = movs_aq_pas[i,k1,k2]#np.max([movs_aq_pas[i,k1,k2] - pars_nw['vel'][k1], 0.])
-                    movs_aq_act[i,k1,k2] = movs_aq_act[i,k1,k2]#np.max([movs_aq_act[i,k1,k2] - pars_nw['vel'][k1], 0.])
-                    
-                    movs_fly_act[i,k1,k2] = movs_fly_act[i,k1,k2] #* (1.0 - pars['ratio_disp_fly_current_orientation'])
+                    movs_aq_pas[i,k1,k2] = movs_aq_pas[i,k1,k2]  #np.max([movs_aq_pas[i,k1,k2] - pars_nw['vel'][k1], 0.]) # If we want to distinguish
+                    movs_aq_act[i,k1,k2] = movs_aq_act[i,k1,k2]  #np.max([movs_aq_act[i,k1,k2] - pars_nw['vel'][k1], 0.]) # If we want to distinguish
+                    movs_fly_act[i,k1,k2] = movs_fly_act[i,k1,k2] #* (1.0 - pars['ratio_disp_fly_current_orientation'])  # If we want to distinguish
                     movs_fly_act[i,k1,k2] = np.max([movs_fly_act[i,k1,k2], 0.])
                 else: # Moving following the current
-                    movs_aq_pas[i,k1,k2] = movs_aq_pas[i,k1,k2]#movs_aq_pas[i,k1,k2] + pars_nw['vel'][k1]
-                    movs_aq_act[i,k1,k2] = movs_aq_act[i,k1,k2]#movs_aq_act[i,k1,k2] + pars_nw['vel'][k1]
-                    
-                    movs_fly_act[i,k1,k2] = movs_fly_act[i,k1,k2] #* pars['ratio_disp_fly_current_orientation']
+                    movs_aq_pas[i,k1,k2] = movs_aq_pas[i,k1,k2]  #movs_aq_pas[i,k1,k2] + pars_nw['vel'][k1] # If we want to distinguish
+                    movs_aq_act[i,k1,k2] = movs_aq_act[i,k1,k2] #movs_aq_act[i,k1,k2] + pars_nw['vel'][k1] # If we want to distinguish
+                    movs_fly_act[i,k1,k2] = movs_fly_act[i,k1,k2] #movs_fly_act[i,k1,k2]* pars['ratio_disp_fly_current_orientation'] # If we want to distinguish
                 
                           
     ## Interaction strength of the species. The following ones are computed for a river stream width = 1.
@@ -917,8 +680,6 @@ def SpeciesParameters_Troph_v3_method(pars, pars_nw, pars_chemres_size1, data_tr
     aver_alphas_pred = pars['aver_pred_prey'] * aver_alphas_pred
     
     aver_alphas = aver_alphas + aver_alphas_pred
-# =============================================================================
-
                 
     # aver_alpha contains the averages interaction strengths, based on the traits, at pristine nodes with width = 1. 
     # However, maybe the interaction strengths is not exactly equal to the one estimated from the traits. 
@@ -939,9 +700,6 @@ def SpeciesParameters_Troph_v3_method(pars, pars_nw, pars_chemres_size1, data_tr
     # ≤ .25 cm  Size1; > .25-.5 cm Size2; > .5-1 cm Size3; > 1-2 cm Size4; > 2-4 cm Size5; > 4-8 cm Size6; > 8 cm Size7
     catefories          = [1,      2,     3,    4,   5,   6,   7 ]
     sizes_categories_cm = [0.1875, 0.375, 0.75, 1.5, 3.0, 6.0, 12.0]
-
-    # mean_size_species_category = np.zeros(pars['number_species'])
-    # mean_size_species_cm       = np.zeros(pars['number_species'])
     
     
     data_size= traits_comp[ [i for i in traits_comp.columns[traits_comp.columns.str.startswith('Size')]] ]
@@ -963,12 +721,7 @@ def SpeciesParameters_Troph_v3_method(pars, pars_nw, pars_chemres_size1, data_tr
     elif (pars['MOA']=='Imida'):
         MSS_traits = data_traits['MSS_Imida']
         EC_traits  = data_traits['EC_Imida']
-    #elif (pars['MOA']=='Tom_Cu'):
-    #    MSS_traits = data_traits['MSS_traits_Tom_Cu']
-    #    EC_traits  = data_traits['EC_traits_Tom_Cu']
-    #elif (pars['MOA']=='Tom_ImidaCloprid'):
-    #    MSS_traits = data_traits['MSS_traits_Tom_ImidaCloprid']
-    #    EC_traits  = data_traits['EC_traits_Tom_ImidaCloprid']
+
 
         
     
@@ -1193,17 +946,9 @@ def main(
         date.strftime("%Y.%m.%d-%H:%M:%S"), '-',idx_sim
         ])
     
-# =============================================================================
-#     file_save_Pop = '_'.join(['TA9_v11_POP_1Loc', sufix])
-# =============================================================================
-    # file_save_Net = '_'.join(['TA9_v15PolVelRiv_ChangeDispChem05_new_NET_OCNet', sufix])
-    # file_save_summ = '_'.join(['TA9_v15PolVelRiv_ChangeDispChem05_new_SUMM_OCNet', sufix])
     file_save_Net  = ''.join(['NewTA_', pars['TA'], '_v17_PolVelRiv_ChangeDispChem05_new_NET_OCNet_', sufix])
     file_save_summ = ''.join(['NewTA_', pars['TA'], '_v17_PolVelRiv_ChangeDispChem05_new_SUMM_OCNet_', sufix])
     
-# =============================================================================
-#     file_save_Pop = os.path.join( os.getcwd(), 'getreal-model', 'results', file_save_Pop) #os.path.join( os.path.dirname(os.getcwd()), 'results', file_save_Pop)
-# =============================================================================
     file_save_Net = os.path.join( os.getcwd(), 'getreal-model', 'results', 'newTAs', file_save_Net) #os.path.join( os.path.dirname(os.getcwd()), 'results', file_save_Net)
     file_save_summ = os.path.join( os.getcwd(), 'getreal-model', 'results', 'newTAs', file_save_summ)
     
@@ -1224,19 +969,13 @@ def main(
     
        
     ## Indicators of local and regional biodiversity
-    # output['gammadiv']           = np.repeat(output['biodiv_net'],           pars['number_nodes'])
     output['gammadiv_corr']           = np.repeat(output['biodiv_net_corr'],           pars['number_nodes'])
-    # output_disc['gammadiv']      = np.repeat(output_disc['biodiv_net'],      pars['number_nodes'])
     output_disc['gammadiv_corr']      = np.repeat(output_disc['biodiv_net_corr'],      pars['number_nodes'])
     
-    # output['alphadiv']                = np.sum(output['final_pops']                >limit_detec, axis=0)
     output['alphadiv_corr']           = np.sum(output['final_pops_corr']           >limit_detec, axis=0)
-    # output_disc['alphadiv']           = np.sum(output_disc['final_pops']           >limit_detec, axis=0)
     output_disc['alphadiv_corr']      = np.sum(output_disc['final_pops_corr']      >limit_detec, axis=0)
     
-    # output['betadiv']                = output['gammadiv']                - output['alphadiv']
     output['betadiv_corr']           = output['gammadiv_corr']           - output['alphadiv_corr']
-    # output_disc['betadiv']           = output_disc['gammadiv']           - output_disc['alphadiv']
     output_disc['betadiv_corr']      = output_disc['gammadiv_corr']      - output_disc['alphadiv_corr']
     
          
@@ -1405,7 +1144,6 @@ for cont in range(5):
                                  method = method)
 
 
-#main(number_species = int(sys.argv[1]), approx_number_nodes=int(sys.argv[2]), mode_network = sys.argv[3], time_sim = float(sys.argv[4]),  loc_polluted_nodes = sys.argv[5]  )
 current, peak = tracemalloc.get_traced_memory()
 print(f'Current memory usage is {current / 10**6}MB; Peak was {peak / 10**6}MB')
 tracemalloc.stop()
