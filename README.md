@@ -2,24 +2,24 @@
 
 Code (.R files and .py files) and data to reproduce the results in ``Predictors of food web resistance to environmental change'', by Jarillo et al. (2025)
 
-* script_fromdb_newTAs_Tom_corrected_v2_PredPreyDiffLinks.py
+* `script_fromdb_newTAs_Tom_corrected_v2_PredPreyDiffLinks.py`
 
   Python script for simmulating the meta-community dynamics of of six representative macroinvertebrate food-web assemblages found across European streams
 
   This script require the csv data files from data_GETREAL/newTAs
 
-* estimating_extinctions_random_matrices_v3_random_estimation_lognormal_histogram_include_min_max.R
+* `estimating_extinctions_random_matrices_v3_random_estimation_lognormal_histogram_include_min_max.R`
 
   R script for simmulating the community dynamics of random communities
 
 
 ## Simulation of random communities
 
-R script for simmulating the community dynamics of random communities: estimating_extinctions_random_matrices_v3_random_estimation_lognormal_histogram_include_min_max.R
+R script for simmulating the community dynamics of random communities: `estimating_extinctions_random_matrices_v3_random_estimation_lognormal_histogram_include_min_max.R`
 
 In this code:
 
-*  We specify the number of prey (nV_max) and predator (nP_max) forming the random communities.
+*  We specify the number of prey (`nV_max`) and predator (`nP_max`) forming the random communities.
 * We sepcify the mean values of the parameters
 	* prey growth rate b
 	* prey death rate m
