@@ -51,3 +51,6 @@ Later on, with the function `SpeciesParameters_Troph_v3_method`, and based on th
 	* whose main food reasource are actually other macroinvertebrates: 
 	`food_livingmacroinvertebrates_t >= 2./3 * max(food_vertebrates_t, food_livingmicroinvertebrates_t, food_deadanimal_t, food_livingmacrophytes_t, food_livingmicrophytes_t, food_deadplant_t, food_detritus_t, food_micro_t)`
 * It categorize the taxa as either flying or not flying taxa (based on the traits `aquatic_pas`, `aquatic_act`, `flying_pas`, `flying_act`
+* For each node spatial network $k_1$:
+	* if $k_1$ is connected to multiple nodes, the fraction of individuals flying to a node $k_2$ from $k_1$ via active aquatic dispersal discrea
+	
