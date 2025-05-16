@@ -10,12 +10,12 @@ Code (.R files and .py files) and data to reproduce the results in ``Predictors 
 
 * `estimating_extinctions_random_matrices_v3_random_estimation_lognormal_histogram_include_min_max.R`
 
-  R script for simmulating the community dynamics of random communities
+  R script for estimating the taxon resistance within random communities
 
 
-## Simulation of random communities
+## Resistance within random communities
 
-R script for simmulating the community dynamics of random communities: `estimating_extinctions_random_matrices_v3_random_estimation_lognormal_histogram_include_min_max.R`
+R script for computing the tazon resistances when considering taxon interactions within random communities: `estimating_extinctions_random_matrices_v3_random_estimation_lognormal_histogram_include_min_max.R`
 
 In this code:
 
@@ -32,10 +32,10 @@ In this code:
 	* the coefficient of variation of all parameters `sigma`
 	* whetther the predators are generalists or specialists (encoded in the variable `mode_predators`).
 	
-Then, the code will assign for the different taxa random parameters for the different rates and interaction strength from a log-normal distributions, with the specified mean values and variances, that ensures that all taxa coexist in the absence of environmental change.
+Then, the code will assign for the different taxa random parameters for the different rates and interaction strength from a log-normal distributions, with the specified mean values and variances, that ensures that all taxa coexist in the absence of environmental change ($\xi = 0$).
 
-Later on, for different strengths of the environmental change driver (`zi`), and based ond the random tolerances, the program will recalculate the taxa growth rates, and compute the equilibrium abundances. The program will also remove from the community those taxa going form a positive to zero abundance, computing for such environmental change the number of prey and rpedators. Finally, the program will store for the different environmental changes the different diversities (number of prey and predators), together with other statistica about the remaining community (that has not been yet removed).
-
+Later on, for different strengths of the environmental change driver intensities $\xi$ (`zi`), and based ond the random tolerances, the program will recalculate the taxa growth rates ($\vec{r} (\xi)$), and compute the equilibrium abundances ($\vec{n}_{eq} = A^{-1} \, \vec{r} (\xi)$, with $A$ a matrix containing the interactions between taxa$).
+The program will also remove from the community those taxa going form a positive to zero abundance, computing for such environmental change $\xi$ the number of remaining prey and predators. Finally, the program will store for the different environmental changes the different diversities (number of prey and predators), together with other statistics about the remaining community (that has not been yet removed).
 
 ## Simulations of typical stream communities in realistic spatial networks
 
@@ -45,12 +45,17 @@ The program first load the traits of the taxa forming a specifici typical macroi
 
 Then, it loads an spatial river-network of a given number of nodes, which were previously generated in R employing the OCNet package.
 
-Later on, with the function `SpeciesParameters_Troph_v3_method`, and based on the traits of the taxa:
-* It categorizes the taxa as either predators or prey. redator taxa are those 
+Later on, with the function `SpeciesParameters_Troph_v3_method`, and based on the traits of the taxa, it categorizes them:
+* as either predators or prey. redator taxa are those 
 	* known to feed on other living macroinvertebrates (`food_livingmacroinvertebrates_t >0`)
 	* whose main food reasource are actually other macroinvertebrates: 
 	`food_livingmacroinvertebrates_t >= 2./3 * max(food_vertebrates_t, food_livingmicroinvertebrates_t, food_deadanimal_t, food_livingmacrophytes_t, food_livingmicrophytes_t, food_deadplant_t, food_detritus_t, food_micro_t)`
-* It categorize the taxa as either flying or not flying taxa (based on the traits `aquatic_pas`, `aquatic_act`, `flying_pas`, `flying_act`
-* For each node spatial network $k_1$:
+* as either flying or not flying taxa (based on the traits `aquatic_pas`, `aquatic_act`, `flying_pas`, `flying_act`. Depending on these traits, we will allow the taxa to move in a differential time step just between connected nodes of the spatial network, or between any pair of nodes. The difference between 'active' and 'pasive' dispersal will rely on how the probability of reaching a node $k_2$ from individiuals dispersing from a node $k_1$ scales with the inverse of the distance between the nodes (active), or with the square of the inverse of such distance (passive).
+	* Hence, departing from a node $k_1$, a flying taxa with active dispersal will be able to get to any other node $k_2$. Among all the individuals of the taxa movingg from $k_1$, the fraction of individuals going to node $k_2$ will be given by
+	$$f_{F,Act} (k_1, k_2) = \frac{1/distance(k_1, k_2)}{\sum_{k'} 1/distance(k_1, k')}$$
+	* a flying taxa with passive dispersal will be able to get to any other node $k_2$. Among all the individuals of the taxa movingg from $k_1$, the fraction of individuals going to node $k_2$ will be given by
+	$$f_{F,Pas} (k_1, k_2) = \frac{1/(distance(k_1, k_2))^2}{\sum_{k'} 1/(distance(k_1, k'))^2}$$
+
+* Hence, For each node spatial network $k_1$:
 	* if $k_1$ is connected to multiple nodes, the fraction of individuals flying to a node $k_2$ from $k_1$ via active aquatic dispersal discrea
 	
