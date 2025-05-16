@@ -27,7 +27,8 @@ In this code:
 	* interespecific competiting strength `alpha`
 	* attack rate `lambda`
 	* conversion efficiency `eta`
-	* prey tolerance tauV
+	* prey tolerance `tauV`
+ 	* predator tolerance `tauP` 
 	* the coefficient of variation of all parameters `sigma`
 	* whetther the predators are generalists or specialists (encoded in the variable `mode_predators`).
 	
