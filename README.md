@@ -50,11 +50,19 @@ Later on, with the function `SpeciesParameters_Troph_v3_method`, and based on th
 	* known to feed on other living macroinvertebrates (`food_livingmacroinvertebrates_t >0`)
 	* whose main food reasource are actually other macroinvertebrates: 
 	`food_livingmacroinvertebrates_t >= 2./3 * max(food_vertebrates_t, food_livingmicroinvertebrates_t, food_deadanimal_t, food_livingmacrophytes_t, food_livingmicrophytes_t, food_deadplant_t, food_detritus_t, food_micro_t)`
-* as either flying or not flying taxa (based on the traits `aquatic_pas`, `aquatic_act`, `flying_pas`, `flying_act`. Depending on these traits, we will allow the taxa to move in a differential time step just between connected nodes of the spatial network, or between any pair of nodes. The difference between 'active' and 'pasive' dispersal will rely on how the probability of reaching a node $k_2$ from individiuals dispersing from a node $k_1$ scales with the inverse of the distance between the nodes (active), or with the square of the inverse of such distance (passive).
-	* Hence, departing from a node $k_1$, a flying taxa with active dispersal will be able to get to any other node $k_2$. Among all the individuals of the taxa movingg from $k_1$, the fraction of individuals going to node $k_2$ will be given by
+* as either flying or not flying taxa (based on the traits `aquatic_pas`, `aquatic_act`, `flying_pas`, `flying_act`. Depending on these traits, we will allow the taxa to move in a differential time step just between connected nodes of the spatial network, or between any pair of nodes. The difference between 'active' and 'pasive' dispersal will rely on how the probability of reaching a node $k_2$ from individiuals dispersing from a node $k_1$ scales with the inverse of the distance between the nodes (active), or with the square of the inverse of such distance (passive). Hence, departing from a node $k_1$, 
+
+	* a flying taxon with active dispersal will be able to get to any other node $k_2$. Among all the individuals of the taxa movingg from $k_1$, the fraction of individuals going to node $k_2$ will be given by
+	
 	$$f_{F,Act} (k_1, k_2) = \frac{1/distance(k_1, k_2)}{\sum_{k'} 1/distance(k_1, k')}$$
-	* a flying taxa with passive dispersal will be able to get to any other node $k_2$. Among all the individuals of the taxa movingg from $k_1$, the fraction of individuals going to node $k_2$ will be given by
+	
+	* a flying taxçon with passive dispersal will be able to get to any other node $k_2$. Among all the individuals of the taxa movingg from $k_1$, the fraction of individuals going to node $k_2$ will be given by
+	
 	$$f_{F,Pas} (k_1, k_2) = \frac{1/(distance(k_1, k_2))^2}{\sum_{k'} 1/(distance(k_1, k'))^2}$$
+	
+	* an aquatic taxon with active dispersal will be able to move to any node $k_2$ *connected to the origen node* $k_1$. 
+	
+	
 
 * Hence, For each node spatial network $k_1$:
 	* if $k_1$ is connected to multiple nodes, the fraction of individuals flying to a node $k_2$ from $k_1$ via active aquatic dispersal discrea
