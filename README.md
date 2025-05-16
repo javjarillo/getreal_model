@@ -41,4 +41,13 @@ Later on, for different strengths of the environmental change driver (`zi`), and
 
 Python script for simmulating the meta-community dynamics of realistic stream communities: `script_fromdb_newTAs_Tom_corrected_v2_PredPreyDiffLinks.py`
 
-The program receives 
+The program first load the traits of the taxa forming a specifici typical macroinvertebrate community (or *typical assemblage*). 
+
+Then, it loads an spatial river-network of a given number of nodes, which were previously generated in R employing the OCNet package.
+
+Later on, with the function `SpeciesParameters_Troph_v3_method`, and based on the traits of the taxa:
+* It categorizes the taxa as either predators or prey. redator taxa are those 
+	* known to feed on other living macroinvertebrates (`food_livingmacroinvertebrates_t >0`)
+	* whose main food reasource are actually other macroinvertebrates: 
+	`food_livingmacroinvertebrates_t >= 2./3 * max(food_vertebrates_t, food_livingmicroinvertebrates_t, food_deadanimal_t, food_livingmacrophytes_t, food_livingmicrophytes_t, food_deadplant_t, food_detritus_t, food_micro_t)`
+* It categorize the taxa as either flying or not flying taxa (based on the traits `aquatic_pas`, `aquatic_act`, `flying_pas`, `flying_act`
