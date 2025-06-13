@@ -21,7 +21,7 @@ In this code:
 	* prey growth rate `b`
 	* prey death rate `m`
 	* predator death rate `d`
-	* interspecific competiting strength `alpha`
+	* interspecific competition strength `alpha`
 	* attack rate `lambda`
 	* conversion efficiency `eta`
 	* prey tolerance `tauV`
@@ -52,14 +52,19 @@ Later on, with the function `SpeciesParameters_Troph_v3_method`, and based on th
 	* The difference between *active* and *pasive* dispersal will rely on how the probability of going to a node $x_2$ from a node $x_1$ scales with the distance between the nodes. 
 	  For active dispersal, the probability of reaching a node $x_2$ for individuals dispersing from a node $x_1$ scales with the inverse of the distance between the nodes.
 	  For passive dispersal, the probability of reaching a node $x_2$ for individuals dispersing from a node $x_1$ scales with the **square** of inverse of the distance between the nodes. 
-		* A flying taxon with active dispersal will be able to get to any other node $x_2$. Among all the individuals of the taxa dispersing from $x_1$, the fraction of individuals going to node $x_2$ will be given by
+		* A flying taxon with active dispersal will be able to get to any other node $x_2$. Among all the individuals of the taxa dispersing from $x_1$, the fraction of individuals going to node $x_2$ will be given by 
+		  
 		  $$f_{F,Act} (x_1, x_2) = \frac{\frac{1}{distance(x_1, x_2)}}{\sum_{x'} \frac{1}{distance(x_1, x')}}$$
 		* A flying taxon with passive dispersal will be able to get to any other node $x_2$. Among all the individuals of the taxa moving from $x_1$, the fraction of individuals going to node $x_2$ will be given by 
+		  
 		  $$f_{F,Pas} (x_1, x_2) = \frac{\frac{1}{(distance(x_1, x_2))^2}}{\sum_{x'} \frac{1}{(distance(x_1, x'))^2}}$$
 		* An aquatic taxon with active dispersal will be able to move to any node $x_2$ **connected to the initial node** $x_1$. Among all the individuals of the taxa dispersing from $x_1$, the fraction of individuals going to node $x_2$ will be given by
+		  
 		  $$f_{Aq,Act} (x_1, x_2) = \frac{\frac{1}{distance(x_1, x_2)}}{\sum_{k' \textrm{ connected to } x_1} \frac{1}{distance(x_1, x')}}$$
-		* An aquatic taxon with passive dispersal will be able to move to any node $x_2$ **connected to the initial node** $x_1$. Among all the individuals of the taxa dispersing from $x_1$, the fraction of individuals going to node $x_2$ will be given by 	
+		* An aquatic taxon with passive dispersal will be able to move to any node $x_2$ **connected to the initial node** $x_1$. Among all the individuals of the taxa dispersing from $x_1$, the fraction of individuals going to node $x_2$ will be given by 
+		  
 		  $$f_{Aq,Pas} (x_1, x_2) = \frac{\frac{1}{(distance(x_1, x_2))^2}}{\sum_{x' \textrm{ connected to } x_1} \frac{1}{(distance(x_1, x'))^2}}$$
+		  
 
 Now we explain how we set the parameters of the taxa for the simulations.
 * **Dispersal rates** $m_i^{\textrm{mode k}}$. For all taxa $i$, we assigned them random dispersal rates $m_i^{\textrm{mode k}} \sim \langle \textrm{AverDispersal}^{\textrm{mode k}} \rangle \left[ 1+ N(0, \sigma) \right]$. By default, we set $\sigma=0.1$, and
@@ -75,13 +80,16 @@ Now we explain how we set the parameters of the taxa for the simulations.
 		* $A_{i,i} = \sim N(1, \sigma)$ (intraspecific competition is set equal to 1). Default value: $\sigma=0.1$
 		* For the the inter-specific competition, the traits of the taxa are employed. 
 			* If preys $i$ and $j$ are known to feed on very different food resources (obtained from the Traits in the Tachet database), the interaction is set to zero. $A_{i,j} = 0$.
-			* Otherwise, if the prey taxa $i,j$ are reported to feed on similar food resources, the interaction strength is modulated based on the sizes of the taxa: $$\begin{aligned} 
+			* Otherwise, if the prey taxa $i,j$ are reported to feed on similar food resources, the interaction strength is modulated based on the sizes of the taxa: 
+			  
+			  $$\begin{aligned} 
 			  size_{i} &\sim N(\mu_i, \sigma_i) , \,
 			  size_j \sim N(\mu_j, \sigma_j) \\
 			  \textrm{mean} \left( A_{i,j} \right)&= \frac{\omega}{\sqrt{\omega^2 + 2 \sigma_i^2+2 \sigma_j^2}} e^{-\frac{(\mu_i-\mu_j)^2}{\omega^2 + 2 \sigma_i^2+2 \sigma_j^2}} \\ 
 			  A_{ij} &\sim \textrm{mean} \left( A_{i,j} \right) \times N(1,\sigma)
 			  \end{aligned}$$
-			  Thus, if the taxa present very different size, or there exist a high variability in the taxon sizes, the interaction between them tend to zero. Otherwise, if they present really similar sizes and the variability is low, the interaction strength is increased up to $\textrm{mean} A_{i,j} \approx 1 - \frac{\sigma_1^2 + \sigma_2^2}{\omega^2} - \frac{(\mu_1 - \mu_2)}{\omega^2}$. By default, we set $\omega=\frac{1}{2}$ and $\sigma=0.1$
+			  
+			  Thus, if the taxa present very different size, or there exist a high variability in the taxon sizes, the interaction between them tend to zero. Otherwise, if they present really similar sizes and the variability is low, the interaction strength is increased up to $\textrm{mean} \left( A_{i,j} \right) \approx 1 - \frac{\sigma_1^2 + \sigma_2^2}{\omega^2} - \frac{(\mu_1 - \mu_2)}{\omega^2}$. By default, we set $\omega=\frac{1}{2}$ and $\sigma=0.1$
 	* *Interactions between the predator taxa.*
 		* $A_{i,i} \sim N(1,\sigma)$ (intraspecific competition is set equal to 1).
 		* For the inter-specific competition, $A_{i,j}=0$. (there is no direct competition between predator species; they can compete indirectly through consumption of similar resources)
@@ -91,21 +99,49 @@ Now we explain how we set the parameters of the taxa for the simulations.
 		* On the contrary, if such interactions has been reported, we modulate the interactions strength based on the size traits between the prey and the predator.
 		  It has been set an optimum ratio of predator-to-prey size of $4$. When the fraction of the sizes differs from this optimum ratio, the attack rate is reduced.
 		  The files `Tachet_NewTA_XXX_210317_gen_predation_connections.csv` already contains the reduction of the attack rate between the predators and the prey based on the sizes, $\lambda_{i,j}$. 
-		  $A_{i,j} \sim \langle AverPredPrey \rangle \, \lambda_{i,j} \times N(1,\sigma)$
-		  $A_{j,i} \sim -\langle AverPredPrey \rangle \, \lambda_{i,j} \, \langle EfficiencyPredation \rangle \times N(1,\sigma)$
+		  
+		  $$\begin{aligned}
+		  A_{i,j} &\sim \langle AverPredPrey \rangle \, \lambda_{i,j} \times N(1,\sigma) \\  
+		  A_{j,i}& \sim -\langle AverPredPrey \rangle \, \lambda_{i,j} \, \langle EfficiencyPredation \rangle \times N(1,\sigma)
+		  \end{aligned}
+		  $$
+		  
 		  By default we set $\langle AverPredPrey \rangle = 1$ and $\langle EfficiencyPredation \rangle = 0.8$
+* **Taxon tolerances and effect of environmental change**.
+	* The tolerances of the different taxa against the different considered chemical pollutants (a metal, copper; a herbicide, atrazine; and a pesticide, imidacloprid) were obtained from
+		* T. Sinclair, P. Craig, and L. L. Maltby. Climate warming shifts riverine macroinvertebrate communities to be more sensitive to chemical pollutants. Global Change Biology, 30 (4):e17254, 2024. https://doi.org/10.1111/gcb.17254
+		* J. F. Jupke,  et al. Europe-wide spatial trends in copper and imidacloprid sensitivity of macroinvertebrate assemblages. Environmental Sciences Europe, 36(1):124, 2024. https://doi.org/10.1186/s12302-024-00944-3
+		* J. F. Jupke. The capacity of broad-scale aquatic typology systems to capture differences in composition and chemical sensitivity of biological assemblages. PhD thesis, Rheinland-Pfälzische Technische Universität Kaiserslautern-Landau, 2024. https://doi.org/10.26204/KLUEDO/7665
+	* From these references we obtained $EC_{50}$ values for the different taxa against the different pollutants.
+	* Then, for a given chemical concentration $\xi$ of an specific pollutant, we alter the growth rates of prey and predator taxa.
+		* For prey taxa $i$, its growth rate is decreased to $r_i^{prey} = r_i \, \left[e^{- \frac{\xi}{EC_i}} - 10^{-3} \right]$. The $10^{-3}$ term is included to ensure that for really high chemical concentrations the growth rate of the taxa are not zero, but negative.
 		  
+		  ![[prey_growth_rate_vs_zi.png]]
 		  
-			  
-For predator taxa,
-* The program will assign growth rate $r_i \sim   - \langle \textrm{AverGrowth} \rangle \left[ 1+ N(0, \sigma) \right]$ (default values: $\textrm{AverGrowth} \rangle = 1, \sigma = 0.1$). This growth rate is negative, reflecting that predator populations decreases in the absence of the prey.
-* A random dispersal rate $m_i \sim \langle \textrm{AverDispersal} \rangle \left[ 1+ N(0, \sigma) \right]$
-
-The dynamics equation for the taxon dynamics are
-
+		* For predator taxa $j$, its growth rate becomes more negative, $r_j^{predator} = r_j \, \left[2-e^{- \frac{\xi}{EC_j}} + 10^{-3} \right]$.
+		  
+		  ![[predator_growth_rate_vs_zi.png]]
+		  
+  
+Once we have assigned to all prey and predator taxa these parameters, we can write the differential equations that govern the community dynamics. We will set then small time steps $\Delta t$, and we will then compute the local dynamics and the dispersal dynamics. For each time step, we assume that it first occurs the local dynamics, with the interaction of the taxa, and later on the dispersal dynamics of motion between the nodes of the spatial network. 
 $$
 \begin{aligned}  
-N_i(x)  &= N_i (x) + \Delta t \, \frac{dN_i^{(local)}}{dt} \\  
-N_i(x)  &= N_i (x) + \Delta t \, \frac{dN_i^{(disperal)}}{dt}
+\widetilde{N_i}(x,t)  &= N_i (x,t) + \Delta t \, \frac{dN_i^{(local)}(x,t)}{dt} \\  
+N_i(x,t+\Delta t)  &= \widetilde{N_i} (x,t) + \Delta t \, \frac{d\widetilde{N_i}^{(disperal)} (x,t)}{dt}
 \end{aligned}
 $$
+
+Where
+$$
+\frac{dN_i^{(local)}(x,t)}{dt} = N_{i} (x,t) \, \left[ r_i + \sum_{j=1}^{n_v+n_p} A_{i,j} \, N_{j} (x,t) \right]
+$$
+and
+$$
+\begin{aligned}
+\frac{dN_i^{(dispersal)}(x,t)}{dt} =& - \left[ m_i^{F,Pas} + m_i^{F,Act} + m_i^{Aq,Pas} + m_i^{Aq,Act}\right] N_i (x,t) \\
+&+ \sum_{y \neq x} \left [ m_i^{F,Pas} f_{F,Pas}(y,x) +  m_i^{F,Act} f_{F,Act}(y,x)\right] N_i (y,t) 
+\\
+&+ \sum_{y \neq x; \, y \textrm{ connected to } x} \left [ m_i^{Aq,Pas} f_{Aq,Pas}(y,x) +  m_i^{Aq,Act} f_{Aq,Act}(y,x)\right] N_i (y,t) 
+\end{aligned}
+$$
+
