@@ -131,6 +131,7 @@ Now we explain how we set the parameters of the taxa for the simulations.
 		  
   
 Once we have assigned to all prey and predator taxa these parameters, we can write the differential equations that govern the community dynamics. We will set then small time steps $\Delta t$, and we will then compute the local dynamics and the dispersal dynamics. For each time step, we assume that it first occurs the local dynamics, with the interaction of the taxa, and later on the dispersal dynamics of motion between the nodes of the spatial network. 
+
 $$
 \begin{aligned}  
 \widetilde{N_i}(x,t)  &= N_i (x,t) + \Delta t \, \frac{dN_i^{(local)}(x,t)}{dt} \\  
@@ -145,7 +146,8 @@ $$\frac{dN_i^{(local)}(x,t)}{dt} = N_{i} (x,t) \, \left[ r_i + \sum_{j=1}^{n_v+n
 and
 
 $$\begin{aligned} \frac{dN_i^{(dispersal)}(x,t)}{dt} =& - \left[ m_i^{F,Pas} + m_i^{F,Act} + m_i^{Aq,Pas} + m_i^{Aq,Act}\right] N_i (x,t) \\
-&+ \sum_{y \neq x} \left [ m_i^{F,Pas} f_{F,Pas}(y,x) +  m_i^{F,Act} f_{F,Act}(y,x)\right] N_i (y,t) \\ &+ \sum_{y \neq x; \, y \textrm{ connected to } x} \left [ m_i^{Aq,Pas} f_{Aq,Pas}(y,x) +  m_i^{Aq,Act} f_{Aq,Act}(y,x)\right] N_i (y,t) 
+&+ \sum_{y \neq x} \left [ m_i^{F,Pas} f_{F,Pas}(y,x) +  m_i^{F,Act} f_{F,Act}(y,x)\right] N_i (y,t) \\ 
+&+ \sum_{y \neq x; \, y \textrm{ connected to } x} \left [ m_i^{Aq,Pas} f_{Aq,Pas}(y,x) +  m_i^{Aq,Act} f_{Aq,Act}(y,x)\right] N_i (y,t) 
 \end{aligned}$$
 
 
