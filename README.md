@@ -115,6 +115,7 @@ Now we explain how we set the parameters of the taxa for the simulations.
 	* From these references we obtained $EC_{50}$ values for the different taxa against the different pollutants.
 	* Then, for a given chemical concentration $\xi$ of an specific pollutant, we alter the growth rates of prey and predator taxa.
 		* For prey taxa $i$, its growth rate is decreased to $r_i^{prey} = r_i \, \left[e^{- \frac{\xi}{EC_i}} - 10^{-3} \right]$. The $10^{-3}$ term is included to ensure that for really high chemical concentrations the growth rate of the taxa are not zero, but negative.
+		![Prey growth rate vs environmental change][prey_growth_rate_vs_zi.png "Prey growth rate vs environmental change"]
 		  
 		  ![[prey_growth_rate_vs_zi.png]]
 		  
