@@ -139,9 +139,13 @@ N_i(x,t+\Delta t)  &= \widetilde{N_i} (x,t) + \Delta t \, \frac{d\widetilde{N_i}
 $$
 
 Where
+
 $$\frac{dN_i^{(local)}(x,t)}{dt} = N_{i} (x,t) \, \left[ r_i + \sum_{j=1}^{n_v+n_p} A_{i,j} \, N_{j} (x,t) \right]$$
+
 and
+
 $$\begin{aligned} \frac{dN_i^{(dispersal)}(x,t)}{dt} =& - \left[ m_i^{F,Pas} + m_i^{F,Act} + m_i^{Aq,Pas} + m_i^{Aq,Act}\right] N_i (x,t) \\
 &+ \sum_{y \neq x} \left [ m_i^{F,Pas} f_{F,Pas}(y,x) +  m_i^{F,Act} f_{F,Act}(y,x)\right] N_i (y,t) \\ &+ \sum_{y \neq x; \, y \textrm{ connected to } x} \left [ m_i^{Aq,Pas} f_{Aq,Pas}(y,x) +  m_i^{Aq,Act} f_{Aq,Act}(y,x)\right] N_i (y,t) 
 \end{aligned}$$
+
 
