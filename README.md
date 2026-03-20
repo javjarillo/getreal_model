@@ -1,6 +1,6 @@
 # Predictors of food web resistance to environmental change
 
-Code (.R files and .py files) and data to reproduce the results in "Predictors of food web resistance to environmental change"', by Jarillo et al. (2025)
+Code (.R files and .py files) and data to reproduce the results in "Predictors of food web resistance to environmental change"', by Jarillo et al. (2026)
 
 * `script_fromdb_newTAs_Tom_corrected_v2_PredPreyDiffLinks.py`
   Python script for simulating the meta-community dynamics of of six representative macroinvertebrate food-web assemblages found across European streams.
@@ -93,7 +93,7 @@ Now we explain how we set the parameters of the taxa for the simulations.
 	* *Interactions between the predator taxa.*
 		* $A_{i,i} \sim N(1,\sigma)$ (intraspecific competition is set equal to 1).
 		* For the inter-specific competition, $A_{i,j}=0$. (there is no direct competition between predator species; they can compete indirectly through consumption of similar resources)
-	* *Interactions between the predators and the prey
+	* *Interactions between the predators and the prey*
 		* Employing the GLOBI database, we can set which predator taxa have been reported to food on which other prey taxa. (In the files, such information is already encoded in the csv files `Tachet_NewTA_XXX_210317_gen_predation_connections.csv`).
 		* If a predator taxon $i$ has not been reported to feed on a prey taxon $j$, the interactions strengths are set to zero ($A_{i,j} = A_{j,i} = 0$)
 		* On the contrary, if such interactions has been reported, we modulate the interactions strength based on the size traits between the prey and the predator.
@@ -103,8 +103,7 @@ Now we explain how we set the parameters of the taxa for the simulations.
 		  $$\begin{aligned}
 		  A_{i,j} &\sim \langle AverPredPrey \rangle \, \lambda_{i,j} \times N(1,\sigma) \\  
 		  A_{j,i}& \sim -\langle AverPredPrey \rangle \, \lambda_{i,j} \, \langle EfficiencyPredation \rangle \times N(1,\sigma)
-		  \end{aligned}
-		  $$
+		  \end{aligned}$$
 		  
 		  By default we set $\langle AverPredPrey \rangle = 1$ and $\langle EfficiencyPredation \rangle = 0.8$
 * **Taxon tolerances and effect of environmental change**.
