@@ -4,8 +4,12 @@
 
 library(OCNet)
 
+path <- file.path(getwd(), "data_GETREAL", "river_nws")
+if (!dir.exists(path)) {
+  dir.create(path, recursive = TRUE)
+}
+setwd(path)
 
-setwd("~/getreal-model/data_GETREAL/river_nws")
 
 sizeX = 32
 sizeY = 32

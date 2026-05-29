@@ -12,12 +12,12 @@ Code (.R files and .py files) and data to reproduce the results in "Predictors o
 
 ## Resistance within random communities
 
-R script for computing the taxon resistances when considering taxon interactions within random communities: `estimating_extinctions_random_matrices_v3_random_estimation_lognormal_histogram_include_min_max.R`
+R script for computing the taxon resistances when considering taxon interactions within random communities: `estimating_extinctions_random_matrices_v4_lognormal_histogram_min_max_fixed.R`
 
-In this code:
+In this code, we specify:
 
-*  We specify the number of prey (`nV_max`) and predator (`nP_max`) forming the random communities.
-* We specify the mean values of the parameters
+* the number of prey (`nV_max`) and predator (`nP_max`) forming the random communities;
+* the mean values of the following parameters:
 	* prey growth rate `b`
 	* prey death rate `m`
 	* predator death rate `d`
@@ -29,7 +29,9 @@ In this code:
 	* the coefficient of variation of all parameters `sigma`
 	* whether the predators are generalists or specialists (encoded in the variable `mode_predators`).
 	
-Then, the code will assign for the different taxa random parameters for the different rates and interaction strength from a log-normal distributions, with the specified mean values and variances, that ensures that all taxa coexist in the absence of environmental change ($\xi = 0$).
+Then, the code will assign for the different taxa random parameter vales for the different rates and interaction strength drawn from log-normal distributions, with the specified mean values and variances, that ensure that all taxa coexist in the absence of environmental change ($\xi = 0$).
+
+For the taxon tolerances within a given trophic level, *the program fixes the minimum and maximum  tolerances* as the quantiles corresponfing to $\pm 5$ standard deviation from the population mean (in log scale). This approach ensures that the minimum and maximum tolerances do not depend on the community size. Consequently, differences in resistance across community sizes are caused by community interactions  rather than by the trivial dependence of the sample minimum and maximum on sample size).
 
 Later on, for different strengths of the environmental change driver intensities $\xi$ (`zi`), and based on the random tolerances, the program will recalculate the taxa growth rates ($\vec{r} (\xi)$), and compute the equilibrium abundances ($\vec{n}_{eq} = A^{-1} \, \vec{r} (\xi)$, with $A$ a matrix containing the interactions between taxa$).
 The program will also remove from the community those taxa going form a positive to zero abundance, computing for such environmental change $\xi$ the number of remaining prey and predators. Finally, the program will store for the different environmental changes the different diversities (number of prey and predators), together with other statistics about the remaining community (that has not been yet removed).
@@ -47,8 +49,7 @@ Later on, with the function `SpeciesParameters_Troph_v3_method`, and based on th
 	* known to feed on other living macroinvertebrates (`food_livingmacroinvertebrates_t >0`)
 	* whose main food resource are actually other macroinvertebrates: 
 	`food_livingmacroinvertebrates_t >= 2./3 * max(food_vertebrates_t, food_livingmicroinvertebrates_t, food_deadanimal_t, food_livingmacrophytes_t, food_livingmicrophytes_t, food_deadplant_t, food_detritus_t, food_micro_t)`
-* as either *flying* or not flying taxa (*aquatic*) (based on the traits `aquatic_pas`, `aquatic_act`, `flying_pas`, `flying_act`. Depending on these traits, we will allow the taxa to move in a differential time step $dt$ just between connected nodes of the spatial network (*aquatic* dispersal), or between any pair of nodes (*flying* dispersal). 
-  **NOTE:** If a taxa has non zero traits for the different categories  `aquatic_pas`, `aquatic_act`, `flying_pas`, `flying_act`, they will be able to disperse using all multiple ways.
+* as either *flying* or not flying taxa (*aquatic*) (based on the traits `aquatic_pas`, `aquatic_act`, `flying_pas`, `flying_act`. Depending on these traits, we will allow the taxa to move in a differential time step $dt$ just between connected nodes of the spatial network (*aquatic* dispersal), or between any pair of nodes (*flying* dispersal).   **NOTE:** If a taxa has non zero traits for the different categories  `aquatic_pas`, `aquatic_act`, `flying_pas`, `flying_act`, they will be able to disperse using all multiple ways.
 	* The difference between *active* and *pasive* dispersal will rely on how the probability of going to a node $x_2$ from a node $x_1$ scales with the distance between the nodes. 
 	  For active dispersal, the probability of reaching a node $x_2$ for individuals dispersing from a node $x_1$ scales with the inverse of the distance between the nodes.
 	  For passive dispersal, the probability of reaching a node $x_2$ for individuals dispersing from a node $x_1$ scales with the **square** of inverse of the distance between the nodes. 

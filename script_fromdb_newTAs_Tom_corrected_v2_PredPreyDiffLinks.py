@@ -92,9 +92,9 @@ def Categorize_Traits(data_traits):
     
     nrow, ncol = data_traits.shape
     
-    TRAITS_COMP = load_database(os.path.join(os.getcwd(), 'getreal-model', 'code', 'traits_comp.csv')) 
-    TRAITS_DISP = load_database(os.path.join(os.getcwd(), 'getreal-model', 'code', 'traits_disp.csv')) 
-    TRAITS_LONG_DIST = load_database(os.path.join(os.getcwd(), 'getreal-model', 'code','traits_long_dist.csv'))
+    TRAITS_COMP = load_database(os.path.join(os.getcwd(), 'data_GETREAL', 'traits', 'traits_comp.csv')) 
+    TRAITS_DISP = load_database(os.path.join(os.getcwd(), 'data_GETREAL', 'traits', 'traits_disp.csv')) 
+    TRAITS_LONG_DIST = load_database(os.path.join(os.getcwd(), 'data_GETREAL', 'traits', 'traits_long_dist.csv'))
            
     for trait_comp in TRAITS_COMP.columns:
         if trait_comp in data_traits.columns:
@@ -317,16 +317,16 @@ def Effect_Traits_Continuous(aver_trait, var_trait , omega):
 
 
 
-def GenerateSpatialNetwork_OCNet_MaxReach_presets(pars, seed=np.int(datetime.datetime.now().strftime("%f"))):
+def GenerateSpatialNetwork_OCNet_MaxReach_presets(pars, seed=int(datetime.datetime.now().strftime("%f"))):
     pars['number_nodes'] = pars['approx_number_nodes']
     repl_river = random.randrange(start=1,stop=11, step=1)
     name_river = '_'.join(['river', str(pars['number_nodes']), 'nodes',
                            str(repl_river), 'repl'])
     
-    data_nodes =load_database(os.path.join(os.getcwd(), 'getreal-model', 'data_GETREAL','river_nws',
+    data_nodes =load_database(os.path.join(os.getcwd(),'data_GETREAL','river_nws',
                                            '_'.join([name_river, 'NODES.csv'])))
     
-    data_edges =load_database(os.path.join(os.getcwd(), 'getreal-model', 'data_GETREAL','river_nws',
+    data_edges =load_database(os.path.join(os.getcwd(),  'data_GETREAL','river_nws',
                                            '_'.join([name_river, 'EDGES.csv'])))
     
     nodes     = np.array(data_nodes['nodes']) - 1 #-1, because in r the first node is the node 1, while in python is the node 0
@@ -659,13 +659,13 @@ def SpeciesParameters_Troph_v3_method(pars, pars_nw, pars_chemres_size1, data_tr
                     
 
     if (method == "GLOBI_Traits"):
-        file_pred_inter = os.path.join(os.getcwd(),'getreal-model','data_GETREAL','newTAs',
+        file_pred_inter = os.path.join(os.getcwd(),'data_GETREAL','newTAs',
                           ''.join(['Tachet_NewTA_', pars['TA'], '_210317_gen_predation_connections.csv'])) 
     elif (method == "EatAll_Traits"):
-        file_pred_inter = os.path.join(os.getcwd(),'getreal-model','data_GETREAL','newTAs',
+        file_pred_inter = os.path.join(os.getcwd(),'data_GETREAL','newTAs',
                           ''.join(['Tachet_NewTA_', pars['TA'], '_210317_gen_predation_connections_eatall_traits.csv'])) 
     elif (method == "EatAll_NOTRAITS"):
-        file_pred_inter = os.path.join(os.getcwd(),'getreal-model','data_GETREAL','newTAs',
+        file_pred_inter = os.path.join(os.getcwd(),'data_GETREAL','newTAs',
                           ''.join(['Tachet_NewTA_', pars['TA'], '_210317_gen_predation_connections_eatall_NOTRAITS.csv'])) 
     
     data_pred_inter = load_database(file_pred_inter, index_col=0) 
@@ -789,7 +789,7 @@ def main(
         vel_river = 0.5,
         method = "GLOBI_Traits"):
     
-    file_traits = os.path.join(os.getcwd(),'getreal-model','data_GETREAL','newTAs',
+    file_traits = os.path.join(os.getcwd(),'data_GETREAL','newTAs',
       ''.join(['Tachet_NewTA_', TA, '_210317_chems_v4_b.csv']))
     #pristine: chem_conc = 0.
     
@@ -949,8 +949,11 @@ def main(
     file_save_Net  = ''.join(['NewTA_', pars['TA'], '_v17_PolVelRiv_ChangeDispChem05_new_NET_OCNet_', sufix])
     file_save_summ = ''.join(['NewTA_', pars['TA'], '_v17_PolVelRiv_ChangeDispChem05_new_SUMM_OCNet_', sufix])
     
-    file_save_Net = os.path.join( os.getcwd(), 'getreal-model', 'results', 'newTAs', file_save_Net) #os.path.join( os.path.dirname(os.getcwd()), 'results', file_save_Net)
-    file_save_summ = os.path.join( os.getcwd(), 'getreal-model', 'results', 'newTAs', file_save_summ)
+    file_save_Net = os.path.join( os.getcwd(),  'results', 'newTAs', file_save_Net) #os.path.join( os.path.dirname(os.getcwd()), 'results', file_save_Net)
+    file_save_summ = os.path.join( os.getcwd(), 'results', 'newTAs', file_save_summ)
+    # create the folders if they do not exist
+    os.makedirs(os.path.dirname(file_save_Net),  exist_ok=True)
+    os.makedirs(os.path.dirname(file_save_summ), exist_ok=True)                                                           
     
     ## Counting the total regional biodiversity
     output['biodiv_net'],      output_disc['biodiv_net'] = 0, 0
@@ -1096,9 +1099,9 @@ increase_growth_prefer_hab = 0.
 decrease_growth_not_prefer_hab = 0.
 thershold_overlap_foods = 0.5
 
-sigma_param =  float(sys.argv[1])
-TA          =  str(sys.argv[2])
-method      =  str(sys.argv[3])
+sigma_param =  0.3 
+TA          =  '1' # values: 1, 2, 3, 4_5, 8_10_11_18, 9, 14_15_16
+method      = 'GLOBI_Traits' 
 
 
 AVER_PRED_PREY = [1.]
